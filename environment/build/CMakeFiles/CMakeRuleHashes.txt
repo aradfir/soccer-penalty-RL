@@ -1,0 +1,7 @@
+# Hashes of file build rules.
+84e5bff219f1867cc713681aaee38b4d rcss/clang/coach_lang_parser.cpp
+986a0b56ab2846654dc32ea70a0ec5a6 rcss/clang/coach_lang_tok.cpp
+f5fc937b5472e5feb67ab2e65ce06787 rcss/clang/raw_coach_lang_tok.cpp
+72788cfc447d34ed946acb20c77555f5 src/player_command_parser.cpp
+a37007b20a22864d015c2f99cd620f27 src/player_command_tok.cpp
+dc3eac188282a54d86974287def5af34 src/raw_player_command_tok.cpp
