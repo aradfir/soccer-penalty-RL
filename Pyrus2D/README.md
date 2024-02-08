@@ -1,5 +1,5 @@
 # Modified PYRUS2D
-This is a modified version of the Pyrus Codebase, forked from develop_bugfix, with added penalty behaviours. find the original on github.com/Cyrus2D/Pyrus2D
+This is a modified version of the Pyrus Codebase, forked from develop_bugfix, with added penalty behaviours. You can find the original on github.com/Cyrus2D/Pyrus2D
 ## Robocup Soccer Simmulation 2D Python Base Code
 
 
