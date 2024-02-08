@@ -1,1 +1,0 @@
-/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/RCSSClient.dir/client.cpp.o -o ../rcssclient  -Wl,-rpath,/home/arad/robo/rcssserver-18.1.3/build/rcss/net:/home/arad/robo/rcssserver-18.1.3/build/rcss/gzip ../rcss/net/librcssnet.so.1.0.1 ../rcss/gzip/librcssgz.so.1.0.0 /usr/lib/x86_64-linux-gnu/libz.so 
