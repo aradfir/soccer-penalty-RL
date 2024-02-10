@@ -3134,14 +3134,9 @@ PenaltyRef::startPenaltyShootout()
               )
          )
     {
-        if ( drand( 0, 1 ) < 0.5 )       // choose random side of the playfield
-        {
-            M_pen_side = LEFT;            // and inform players
-        }
-        else
-        {
-            M_pen_side = RIGHT;
-        }
+        // CHANGED FOR PENALTY SIMULATOR
+        M_pen_side = RIGHT;
+        
 
         M_stadium.clearBallCatcher();
         M_stadium.sendRefereeAudio( M_pen_side == LEFT
@@ -3149,7 +3144,8 @@ PenaltyRef::startPenaltyShootout()
                                     : "penalty_onfield_r" );
         // choose at random who starts (note that in penalty_init, actually the
         // opposite player is chosen since there the playMode changes)
-        M_cur_pen_taker = ( drand( 0, 1 ) < 0.5 ) ? LEFT : RIGHT;
+        // CHANGED FOR PENALTY SIMULATOR
+        M_cur_pen_taker = LEFT;
 
         // place the goalkeeper of the opposite field close to the penalty goal
         // otherwise it is hard to get there before pen_setup_wait cycles
@@ -3263,7 +3259,10 @@ PenaltyRef::handleTimeout( bool left_move_check,
 
         left_move_check = right_move_check = true;
     }
-
+    if ( M_cur_pen_taker == RIGHT ){
+        // right team cant take penalties!
+        penalty_foul(RIGHT);
+    }
 
     if ( pm == PM_PenaltyMiss_Left
          || pm == PM_PenaltyScore_Left
@@ -3328,6 +3327,10 @@ PenaltyRef::handleTimer( const bool left_move_check,
                              M_stadium.ball().pos() );
 
         return;
+    }
+     if ( M_cur_pen_taker == RIGHT ){
+        // right team cant take penalties!
+        penalty_foul(RIGHT);
     }
 
     if ( left_move_check
@@ -3472,15 +3475,22 @@ PenaltyRef::kickTaken( const Player & kicker,
     {
         return;
     }
-
+    
     if ( M_stadium.ballCatcher() )
     {
         std::cerr << "player kicked and goalie catched at the same time" << std::endl;
+    }
+    // cause foul if right team is kicking, as we are training for left team attacking
+    else if (M_stadium.playmode() == PM_PenaltyReady_Right || M_stadium.playmode() == PM_PenaltySetup_Right)
+    {
+        std::cerr << "right team cant kick! " << RIGHT << std::endl;
+        penalty_foul( RIGHT );
     }
     // if in setup it is not allowed to kick the ball
     else if ( M_stadium.playmode() == PM_PenaltySetup_Left
               || M_stadium.playmode() == PM_PenaltySetup_Right )
     {
+        std::cerr<< "kicked in setup mode. foul " << -M_cur_pen_taker << std::endl;
         penalty_foul( kicker.side() );
     }
     // cannot kick second time after penalty was taken
@@ -3489,6 +3499,7 @@ PenaltyRef::kickTaken( const Player & kicker,
                    || M_stadium.playmode() == PM_PenaltyTaken_Right )
               && kicker.side() == M_cur_pen_taker )
     {
+        std::cerr << "kicked second time. foul " << -M_cur_pen_taker << std::endl;
         penalty_foul( M_cur_pen_taker );
     }
     else if ( M_stadium.playmode() == PM_PenaltyReady_Left
@@ -3499,6 +3510,7 @@ PenaltyRef::kickTaken( const Player & kicker,
         if ( ( M_stadium.playmode() == PM_PenaltyReady_Left
                || M_stadium.playmode() == PM_PenaltyReady_Right )
              && kicker.side() == M_cur_pen_taker
+             && false
              && ( ( LEFT == M_cur_pen_taker
                     && M_sLeftPenTaken.find( kicker.unum() ) != M_sLeftPenTaken.end() )
                   || ( RIGHT == M_cur_pen_taker
@@ -3506,7 +3518,9 @@ PenaltyRef::kickTaken( const Player & kicker,
                   )
              )
         {
+            // CHANGED: dont give foul for repeat penatly
             // this kicker has already taken the kick
+            std::cerr << "kicker already taken the kick. foul " << -M_cur_pen_taker << std::endl;
             penalty_foul( M_cur_pen_taker );
         }
         else if ( M_last_taker
@@ -3514,12 +3528,16 @@ PenaltyRef::kickTaken( const Player & kicker,
                   && M_last_taker != &kicker )
         {
             // not a taker player in the same team must not kick the ball.
+            std::cerr << "not a taker player in the same team must not kick the ball. foul "
+                      << -M_cur_pen_taker << std::endl;
             penalty_foul( M_cur_pen_taker );
         }
         else if ( kicker.side() != M_cur_pen_taker
                   && ! kicker.isGoalie() )
         {
             // field player in the defending team must not kick the ball.
+            std::cerr << "field player in the defending team must not kick the ball. foul "
+                      << -M_cur_pen_taker << std::endl;
             penalty_foul( static_cast< Side >( -M_cur_pen_taker ) );
         }
         else
@@ -3532,7 +3550,7 @@ PenaltyRef::kickTaken( const Player & kicker,
     if ( M_stadium.playmode() == PM_PenaltyReady_Left )
     {
         // when penalty is taken, add player, multiple copies are deleted
-        M_sLeftPenTaken.insert( kicker.unum() );
+        // M_sLeftPenTaken.insert( kicker.unum() );
         if ( M_sLeftPenTaken.size() == MAX_PLAYER )
         {
             M_sLeftPenTaken.clear();
@@ -3541,7 +3559,7 @@ PenaltyRef::kickTaken( const Player & kicker,
     }
     else if ( M_stadium.playmode() == PM_PenaltyReady_Right )
     {
-        M_sRightPenTaken.insert( kicker.unum() );
+        // M_sRightPenTaken.insert( kicker.unum() );
         if ( M_sRightPenTaken.size() == MAX_PLAYER )
         {
             M_sRightPenTaken.clear();
